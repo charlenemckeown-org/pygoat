@@ -2,6 +2,7 @@ import datetime
 import re
 import subprocess
 from hashlib import md5
+from simpleeval import simple_eval
 
 import jwt
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
@@ -215,7 +216,10 @@ def csrf_transfer_monei_api(request,recipent,amount):
 def mitre_lab_25_api(request):
     if request.method == "POST":
         expression = request.POST.get('expression')
-        result = eval(expression)
+        try:
+            result = simple_eval(expression)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
         return JsonResponse({'result': result})
     else:
         return redirect('/mitre/25/lab/')
